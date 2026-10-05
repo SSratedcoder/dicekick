@@ -1,4 +1,6 @@
 const { getHistory } = require('./history');
+const { getPresets, getPreset, findCandidates, setPreset, removePreset } = require('./presets');
+const { parseDice } = require('./dice');
 const { EmbedBuilder } = require('discord.js');
 
 function handleHelp(message) {
@@ -8,7 +10,11 @@ function handleHelp(message) {
     .addFields(
       {
         name: 'Rolando dados',
-        value: 'Basta digitar a notação do dado no chat.\nEx: `1d20` `2d6+3` `1d20 2d8`',
+        value: 'Basta digitar a notação do dado no chat.\nEx: `1d20` `2d6+3` `1d20 2d8`\nOu digite o nome de um dado salvo, ex: `bola de fogo`',
+      },
+      {
+        name: 'Dados salvos',
+        value: '`!add bola de fogo 3d6` cria o atalho\nDigitar `bola de fogo` no chat rola `3d6`\n`!rm bola de fogo` remove\n`!list` mostra todos os seus',
       },
       {
         name: 'Modificadores',
@@ -43,4 +49,83 @@ function handleHistory(message) {
   message.reply({ embeds: [embed] });
 }
 
-module.exports = { handleHelp, handleHistory };
+function handleAdd(message, args) {
+  const parts = args.split(/\s+/).filter(Boolean);
+  if (parts.length < 2) {
+    return message.reply('Uso: `!add <nome> <notação>` — ex: `!add bola de fogo 3d6`');
+  }
+  const notation = parts[parts.length - 1];
+  const name = parts.slice(0, -1).join(' ');
+  if (!/^\d+d\d+([+-]\d+)?$/i.test(notation)) {
+    return message.reply(`"${notation}" não é uma notação válida. Use algo como \`3d6\` ou \`2d10+2\`.`);
+  }
+  const parsed = parseDice(notation);
+  if (!parsed || parsed.length === 0) {
+    return message.reply(`"${notation}" não é uma notação válida.`);
+  }
+  const result = setPreset(message.author.id, name, notation);
+  if (!result.ok) {
+    return message.reply('Não consegui salvar esse dado.');
+  }
+  message.reply(
+    result.replaced
+      ? `🔄 Atualizado: **${result.entry.name}** agora rola \`${result.entry.notation}\``
+      : `✅ Dado salvo: **${result.entry.name}** → \`${result.entry.notation}\`\nAgora é só digitar \`${result.entry.name}\` no chat.`
+  );
+}
+
+function handleRemove(message, args) {
+  if (!args.trim()) {
+    return message.reply('Uso: `!rm <nome>` — ex: `!rm bola de fogo`');
+  }
+  const result = removePreset(message.author.id, args);
+  if (!result.ok) {
+    return message.reply(`Não achei um dado chamado "${args.trim()}". Use \`!list\` pra ver os seus.`);
+  }
+  message.reply(`🗑️ Removido: **${result.name}**`);
+}
+
+function handleList(message) {
+  const presets = getPresets(message.author.id);
+  if (presets.length === 0) {
+    return message.reply('Você ainda não salvou nenhum dado.\nCrie com `!add bola de fogo 3d6`');
+  }
+  const lines = presets
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(p => `🎲 **${p.name}** → \`${p.notation}\``);
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle(`📦 Seus dados — ${message.author.username}`)
+    .setDescription(lines.join('\n'))
+    .setFooter({ text: `${presets.length} de 50 slots` });
+  message.reply({ embeds: [embed] });
+}
+
+function handleRoll(message, args) {
+  if (!args.trim()) {
+    return message.reply('Uso: `!roll <nome>` — ex: `!roll bola de fogo`');
+  }
+  const preset = getPreset(message.author.id, args);
+  if (!preset) {
+    const candidates = findCandidates(message.author.id, args);
+    if (candidates.length === 1) {
+      return message.reply(`Você quis dizer **${candidates[0].name}**? Use \`!roll ${candidates[0].name}\`.`);
+    }
+    return message.reply(`Não achei um dado chamado "${args.trim()}". Use \`!list\` pra ver os seus.`);
+  }
+  return { preset };
+}
+
+const HELP_LINES = {
+  add: 'Cria um atalho: `!add bola de fogo 3d6`',
+  criar: 'Cria um atalho: `!criar bola de fogo 3d6`',
+  rm: 'Remove um atalho: `!rm bola de fogo`',
+  apagar: 'Remove um atalho: `!apagar bola de fogo`',
+  list: 'Lista seus dados salvos',
+  lista: 'Lista seus dados salvos',
+  roll: 'Rola um dado salvo: `!roll bola de fogo`',
+  rolar: 'Rola um dado salvo: `!rolar bola de fogo`',
+};
+
+module.exports = { handleHelp, handleHistory, handleAdd, handleRemove, handleList, handleRoll, HELP_LINES };
