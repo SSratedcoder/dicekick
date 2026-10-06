@@ -6,7 +6,7 @@ Bot do Discord para rolagem de dados. Basta digitar a notação no chat que ele 
 
 - **Rolagem automática** — digite `1d20`, `2d6+3`, `100d100` direto no chat
 - **Múltiplos dados** — `1d20 2d8 3d6`
-- **Modificadores** — `2d10+5`, `1d8-2`
+- **Modificadores** — `2d10+5`, `1d8-2`, `2d6*3`, `4d6/2`
 - **Dados salvos** — defina um nome pra uma notação e rola digitando o nome
 - **Histórico** — salva as últimas 20 rolagens por usuário (JSON)
 - **Rate limit** — 2 segundos entre rolagens pra evitar spam
@@ -18,10 +18,31 @@ Bot do Discord para rolagem de dados. Basta digitar a notação no chat que ele 
 | `1d20` | Rola 1 dado de 20 faces |
 | `2d6+3` | Rola 2d6 e soma +3 |
 | `1d20 2d8` | Rola 1d20 e 2d8 em sequência |
+| `2d6*3` | Cada dado e o total multiplicados por 3 |
+| `4d6/2` | Cada dado e o total divididos por 2 |
+| `2d6+3*2` | Combina operadores, com precedência normal |
 | `rola 1d20 ai` | Ignorado (texto extra) |
+| `2d6/0` | Ignorado (divisão por zero) |
 | `bola de fogo` | Rola o dado salvo com esse nome |
 | `!help` | Mostra ajuda |
 | `!history` | Mostra suas últimas 10 rolagens |
+
+## Modificadores
+
+| Notação | O que faz |
+|---|---|
+| `2d6+3` | Soma 3 no total |
+| `2d6-2` | Subtrai 2 do total |
+| `2d6*3` | Multiplica cada dado e o total por 3 |
+| `4d6/2` | Divide cada dado e o total por 2 |
+| `2d6+3*2` | Avaliado com precedência normal: `9 + 6 = 15` |
+
+`*` e `/` aparecem aplicados em cada dado individualmente e no total, porque
+depende do que você quer ver: o valor de cada dado já escalado, o total, ou os
+dois.
+
+Divisão não arredonda — `7/2` dá `3.5`. `+` e `-` são aplicados só no total,
+nunca em cada dado, senão um `d6` viraria algo maior que 6.
 
 ## Dados salvos
 

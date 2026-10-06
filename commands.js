@@ -18,7 +18,7 @@ function handleHelp(message) {
       },
       {
         name: 'Modificadores',
-        value: 'Use `+` ou `-` no final: `1d20+5`, `3d8-2`',
+        value: 'Use `+` ou `-`: `1d20+5`, `3d8-2`\nUse `*` ou `/`: `2d6*3`, `4d6/2`\nDá pra combinar: `2d6+3*2` (precedência normal)',
       },
       {
         name: '!help',
@@ -56,12 +56,9 @@ function handleAdd(message, args) {
   }
   const notation = parts[parts.length - 1];
   const name = parts.slice(0, -1).join(' ');
-  if (!/^\d+d\d+([+-]\d+)?$/i.test(notation)) {
-    return message.reply(`"${notation}" não é uma notação válida. Use algo como \`3d6\` ou \`2d10+2\`.`);
-  }
   const parsed = parseDice(notation);
   if (!parsed || parsed.length === 0) {
-    return message.reply(`"${notation}" não é uma notação válida.`);
+    return message.reply(`"${notation}" não é uma notação válida. Use algo como \`3d6\`, \`2d10+2\`, \`2d6*3\` ou \`4d6/2\`.`);
   }
   const result = setPreset(message.author.id, name, notation);
   if (!result.ok) {
