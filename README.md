@@ -1,77 +1,76 @@
 # 🎲 Dicekick
 
-Bot do Discord para rolagem de dados. Basta digitar a notação no chat que ele rola automaticamente — sem comandos, sem prefixo.
+Bot de Discord que rola dados. Digita a notação no chat e ele responde — sem
+comando, sem prefixo.
 
 ## Funcionalidades
 
-- **Rolagem automática** — digite `1d20`, `2d6+3`, `100d100` direto no chat
+- **Rolagem automática** — `1d20`, `2d6+3`, `100d100` direto no chat
 - **Múltiplos dados** — `1d20 2d8 3d6`
-- **Modificadores** — `2d10+5`, `1d8-2`, `2d6*3`, `4d6/2`
-- **Dados salvos** — defina um nome pra uma notação e rola digitando o nome
-- **Histórico** — salva as últimas 20 rolagens por usuário (JSON)
-- **Rate limit** — 2 segundos entre rolagens pra evitar spam
+- **Modificadores** — `+`, `-`, `*` e `/`, inclusive combinados
+- **Dados salvos** — dá um nome a uma notação e rola digitando o nome
+- **Histórico** — as últimas 20 rolagens de cada usuário
+- **Rate limit** — 2 segundos entre rolagens
 
-## Como usar
+## Uso rápido
 
-| Mensagem | Resultado |
+| Você digita | O que acontece |
 |---|---|
 | `1d20` | Rola 1 dado de 20 faces |
-| `2d6+3` | Rola 2d6 e soma +3 |
-| `1d20 2d8` | Rola 1d20 e 2d8 em sequência |
-| `2d6*3` | Cada dado e o total multiplicados por 3 |
-| `4d6/2` | Cada dado e o total divididos por 2 |
-| `2d6+3*2` | Combina operadores, com precedência normal |
-| `rola 1d20 ai` | Ignorado (texto extra) |
-| `2d6/0` | Ignorado (divisão por zero) |
+| `2d6+3` | Rola 2d6 e soma 3 no total |
+| `1d20 2d8` | Rola 1d20 e 2d8, tudo na mesma mensagem |
+| `2d6*3` | Multiplica cada dado e o total por 3 |
+| `4d6/2` | Divide cada dado e o total por 2 |
 | `bola de fogo` | Rola o dado salvo com esse nome |
-| `!help` | Mostra ajuda |
-| `!history` | Mostra suas últimas 10 rolagens |
+| `rola 1d20 ai` | Ignorado — texto extra invalida a mensagem |
+| `2d6/0` | Ignorado — divisão por zero |
 
 ## Modificadores
 
-| Notação | O que faz |
+| Notação | Resultado |
 |---|---|
-| `2d6+3` | Soma 3 no total |
-| `2d6-2` | Subtrai 2 do total |
-| `2d6*3` | Multiplica cada dado e o total por 3 |
-| `4d6/2` | Divide cada dado e o total por 2 |
-| `2d6+3*2` | Avaliado com precedência normal: `9 + 6 = 15` |
+| `2d6+3` | total + 3 |
+| `2d6-2` | total − 2 |
+| `2d6*3` | cada dado e o total × 3 |
+| `4d6/2` | cada dado e o total ÷ 2 |
+| `2d6+3*2` | com os dados dando 4 e 5: `9 + 6 = 15` |
+| `3d6+2*4-5` | com os dados dando 1, 2 e 3: `6 + 8 − 5 = 9` |
 
-`*` e `/` aparecem aplicados em cada dado individualmente e no total, porque
-depende do que você quer ver: o valor de cada dado já escalado, o total, ou os
-dois.
+Combinações usam a precedência de matemática normal: `*` e `/` antes de `+` e `-`.
 
-Divisão não arredonda — `7/2` dá `3.5`. `+` e `-` são aplicados só no total,
-nunca em cada dado, senão um `d6` viraria algo maior que 6.
+`*` e `/` são aplicados em cada dado **e** no total, e os dois aparecem na
+resposta. `+` e `-` entram só no total — somar em cada dado individualmente faria
+um `d6` virar algo maior que 6.
+
+Divisão não arredonda: `7/2` dá `3.5`.
 
 ## Dados salvos
 
-Crie um atalho pra notação que você usa sempre e rola pelo nome, sem digitar
-`3d6` toda vez:
+Para não digitar a mesma notação o tempo todo, dá um nome a ela:
 
 ```
 !add bola de fogo 3d6
 ```
 
-A partir daí, digitar `bola de fogo` no chat rola `3d6`. Funciona com nome
-composto, com ou sem maiúsculas, e não precisa do prefixo `!`.
+Depois é só digitar `bola de fogo` no chat. Não precisa do `!`, aceita nome com
+palavras e não diferencia maiúsculas.
 
-Nomes aproximados ganham sugestão em vez de silêncio: se você digitar `bola` e
-o único atalho que combina for `bola de fogo`, o bot pergunta se foi esse.
+Se você digitar algo próximo (por exemplo `bola`) e houver um único atalho que
+combina, o bot pergunta se foi esse em vez de ficar calado.
 
 ### Comandos
 
-| Comando | O que faz |
-|---|---|
-| `!add <nome> <notação>` | Cria um atalho (alias: `!criar`) |
-| `!rm <nome>` | Remove um atalho (alias: `!apagar`) |
-| `!list` | Lista seus atalhos (alias: `!lista`) |
-| `!roll <nome>` | Rola um atalho explicitamente (alias: `!rolar`) |
-| `!help` | Mostra a ajuda |
-| `!history` | Suas últimas 10 rolagens |
+| Comando | Alias | O que faz |
+|---|---|---|
+| `!add <nome> <notação>` | `!criar` | Cria um atalho |
+| `!rm <nome>` | `!apagar` | Remove um atalho |
+| `!list` | `!lista` | Lista seus atalhos |
+| `!roll <nome>` | `!rolar` | Rola um atalho explicitamente |
+| `!help` | — | Mostra a ajuda no chat |
+| `!history` | — | Suas últimas 10 rolagens |
 
-Os atalhos são por usuário e ficam em `presets.json`, com limite de 50 por
-pessoa. Passar `!add` num nome que já existe sobrescreve a notação.
+Os atalhos são por usuário, ficam em `presets.json` e o limite é 50 por pessoa.
+`!add` num nome que já existe sobrescreve a notação.
 
 ## Instalação
 
@@ -81,7 +80,7 @@ cd dicekick
 npm install
 ```
 
-O `config.json` já vem no repositório com o token em branco. Edite e cole o token
+O `config.json` já vem no repositório com o token em branco. Abra e cole o token
 do seu bot:
 
 ```json
@@ -91,23 +90,46 @@ do seu bot:
 }
 ```
 
-Atenção: como o `config.json` está versionado, o `.gitignore` não se aplica a ele.
-Se você preencher o token localmente, **não commite** esse arquivo — ele ficaria
-público. Para um setup local, prefira manter o token fora do git.
+`prefix` define a letra que inicia os comandos e é opcional (`!` por padrão).
 
-O `prefixo` é opcional e define a letra que inicia os comandos (`!` por padrão).
-
-## Pré-requisitos
-
-- [Node.js](https://nodejs.org/) 16.9+
-- Um bot no [Discord Developer Portal](https://discord.com/developers/applications) com as seguintes intents habilitadas:
-  - `MESSAGE CONTENT INTENT`
-  - `SERVER MEMBERS INTENT` (opcional)
+> **Cuidado:** o `config.json` está versionado, então o `.gitignore` não se aplica
+> a ele. Se você colar o token e rodar `git add .`, ele vai para o repositório
+> público. Se for mexer no código, tire o token do arquivo antes de commitar, ou
+> apague a linha e mantenha só o placeholder.
 
 ## Rodar
 
 ```bash
 npm start
+```
+
+## Pré-requisitos
+
+- [Node.js](https://nodejs.org/) 16.9+
+- Um bot no [Discord Developer Portal](https://discord.com/developers/applications)
+
+### Intents
+
+Habilite **uma** intent em Bot → Privileged Gateway Intents:
+
+| Intent | Precisa? |
+|---|---|
+| **MESSAGE CONTENT INTENT** | sim — sem ela o bot não vê o texto |
+| SERVER MEMBERS INTENT | não — o código nunca busca membros |
+| PRESENCE INTENT | não |
+| DIRECT MESSAGES INTENT | não — só funciona em servidores |
+
+### Permissões no servidor
+
+O bot só precisa de **VER CANAL**, **ENVIAR MENSAGENS** e **HISTÓRICO DE
+MENSAGENS**, que já vêm liberados por padrão. Não precisa de Administrador,
+Gerenciar Mensagens nem Mencionar @everyone.
+
+Se estiver adicionando o bot pelo navegador, use esta URL com o botão de invite,
+o `permissions=68608` já é o trio mínimo:
+
+```
+https://discord.com/api/oauth2/authorize?client_id=SEU_CLIENT_ID&permissions=68608&scope=bot
 ```
 
 ## Licença
