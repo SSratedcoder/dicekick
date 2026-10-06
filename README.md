@@ -79,14 +79,10 @@ pessoa. Passar `!add` num nome que já existe sobrescreve a notação.
 git clone https://github.com/SSratedcoder/dicekick.git
 cd dicekick
 npm install
-cp config.example.json config.json
 ```
 
-No Windows PowerShell, o passo equivalente é `Copy-Item config.example.json config.json`.
-
-O `config.json` não está no repositório de propósito — é onde fica o token do
-seu bot, e commitá-lo vaza credencial. Por isso o passo `cp` é obrigatório.
-Depois de criar o arquivo, edite com o token:
+O `config.json` já vem no repositório com o token em branco. Edite e cole o token
+do seu bot:
 
 ```json
 {
@@ -94,6 +90,10 @@ Depois de criar o arquivo, edite com o token:
   "prefix": "!"
 }
 ```
+
+Atenção: como o `config.json` está versionado, o `.gitignore` não se aplica a ele.
+Se você preencher o token localmente, **não commite** esse arquivo — ele ficaria
+público. Para um setup local, prefira manter o token fora do git.
 
 O `prefixo` é opcional e define a letra que inicia os comandos (`!` por padrão).
 
