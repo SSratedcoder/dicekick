@@ -8,6 +8,8 @@ comando, sem prefixo.
 - **Rolagem automática** — `1d20`, `2d6+3`, `100d100` direto no chat
 - **Múltiplos dados** — `1d20 2d8 3d6`
 - **Modificadores** — `+`, `-`, `*` e `/`, inclusive combinados
+- **Expressões** — parênteses e precedência: `(2d6+1d8)*3-1d4/2`
+- **Espaços livres** — `1d20 + 3` funciona igual a `1d20+3`
 - **Dados salvos** — dá um nome a uma notação e rola digitando o nome
 - **Histórico** — as últimas 20 rolagens de cada usuário
 - **Rate limit** — 2 segundos entre rolagens
@@ -21,6 +23,8 @@ comando, sem prefixo.
 | `1d20 2d8` | Rola 1d20 e 2d8, tudo na mesma mensagem |
 | `2d6*3` | Multiplica cada dado e o total por 3 |
 | `4d6/2` | Divide cada dado e o total por 2 |
+| `1d20 + 3` | Mesma coisa que `1d20+3` — espaço é opcional |
+| `(2d6+1d8)*3` | Soma os grupos primeiro, depois multiplica por 3 |
 | `bola de fogo` | Rola o dado salvo com esse nome |
 | `rola 1d20 ai` | Ignorado — texto extra invalida a mensagem |
 | `2d6/0` | Ignorado — divisão por zero |
@@ -36,7 +40,9 @@ comando, sem prefixo.
 | `2d6+3*2` | com os dados dando 4 e 5: `9 + 6 = 15` |
 | `3d6+2*4-5` | com os dados dando 1, 2 e 3: `6 + 8 − 5 = 9` |
 
-Combinações usam a precedência de matemática normal: `*` e `/` antes de `+` e `-`.
+Combinações usam a precedência de matemática normal: `*` e `/` antes de `+` e `-`,
+e parênteses mandam mais que tudo. Espaços entre números, dados e operadores são
+ignorados: `( 2d6 + 1d8 ) * 3` é o mesmo que `(2d6+1d8)*3`.
 
 `*` e `/` são aplicados em cada dado **e** no total, e os dois aparecem na
 resposta. `+` e `-` entram só no total — somar em cada dado individualmente faria
@@ -53,7 +59,9 @@ Para não digitar a mesma notação o tempo todo, dá um nome a ela:
 ```
 
 Depois é só digitar `bola de fogo` no chat. Não precisa do `!`, aceita nome com
-palavras e não diferencia maiúsculas.
+palavras e não diferencia maiúsculas. A notação também pode ter espaços, desde
+que venha no fim: `!add dano 2d6 + 1d8` salva o nome `dano` com a notação
+`2d6 + 1d8`.
 
 Se você digitar algo próximo (por exemplo `bola`) e houver um único atalho que
 combina, o bot pergunta se foi esse em vez de ficar calado.
@@ -92,10 +100,16 @@ do seu bot:
 
 `prefix` define a letra que inicia os comandos e é opcional (`!` por padrão).
 
-> **Cuidado:** o `config.json` está versionado, então o `.gitignore` não se aplica
-> a ele. Se você colar o token e rodar `git add .`, ele vai para o repositório
-> público. Se for mexer no código, tire o token do arquivo antes de commitar, ou
-> apague a linha e mantenha só o placeholder.
+> **Cada pessoa precisa do bot dela.** O token é de quem roda o bot, não do
+> código. Quem clonar este repositório tem que criar a própria aplicação no
+> [Discord Developer Portal](https://discord.com/developers/applications) e usar
+> o token dela — o token do dono do repositório não vai junto e não deve ser
+> compartilhado.
+>
+> Nunca comite o seu. O `config.json` está versionado, então o `.gitignore` não
+> se aplica a ele: se você colar o token e rodar `git add .`, ele vai para o
+> repositório público. Antes de commitar, devolva a linha ao placeholder
+> `SEU_TOKEN_AQUI`.
 
 ## Rodar
 

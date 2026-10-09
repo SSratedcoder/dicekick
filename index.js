@@ -40,11 +40,15 @@ function performRoll(message, parsed, notation) {
     return message.reply('Calma aí, vai com calma! Aguarde 2 segundos entre rolagens.');
   }
 
-  const results = rollDice(parsed);
-  const total = results.reduce((sum, r) => sum + r.total, 0);
-  const resultStr = formatResult(results);
+  let rolled;
+  try {
+    rolled = rollDice(parsed);
+  } catch (err) {
+    return message.reply(`Não consegui rolar \`${notation}\`: ${err.message}.`);
+  }
 
-  addEntry(message.author.id, message.author.username, notation, resultStr, total);
+  const resultStr = formatResult(rolled, notation);
+  addEntry(message.author.id, message.author.username, notation, resultStr, rolled.total);
   return message.reply(resultStr);
 }
 
@@ -89,7 +93,7 @@ client.on('messageCreate', async (message) => {
   }
 
   const parsed = parseDice(content);
-  if (!parsed || parsed.length === 0) return;
+  if (!parsed) return;
 
   performRoll(message, parsed, content);
 });

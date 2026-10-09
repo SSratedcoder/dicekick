@@ -21,6 +21,10 @@ function handleHelp(message) {
         value: 'Use `+` ou `-`: `1d20+5`, `3d8-2`\nUse `*` ou `/`: `2d6*3`, `4d6/2`\nDá pra combinar: `2d6+3*2` (precedência normal)',
       },
       {
+        name: 'Expressões',
+        value: 'Parênteses e precedência: `(2d6+1d8)*3-1d4/2`\nEspaços à vontade no operador: `1d20 + 3`\nSoma implícita de grupos: `1d20 2d8`',
+      },
+      {
         name: '!help',
         value: 'Mostra esta mensagem',
       },
@@ -54,12 +58,22 @@ function handleAdd(message, args) {
   if (parts.length < 2) {
     return message.reply('Uso: `!add <nome> <notação>` — ex: `!add bola de fogo 3d6`');
   }
-  const notation = parts[parts.length - 1];
-  const name = parts.slice(0, -1).join(' ');
-  const parsed = parseDice(notation);
-  if (!parsed || parsed.length === 0) {
-    return message.reply(`"${notation}" não é uma notação válida. Use algo como \`3d6\`, \`2d10+2\`, \`2d6*3\` ou \`4d6/2\`.`);
+
+  let name = null;
+  let notation = null;
+  for (let i = 0; i <= parts.length - 2; i++) {
+    const candidate = parts.slice(i + 1).join(' ');
+    if (parseDice(candidate)) {
+      name = parts.slice(0, i + 1).join(' ');
+      notation = candidate;
+      break;
+    }
   }
+
+  if (!notation) {
+    return message.reply(`Não achei uma notação válida em \`${args.trim()}\`. Use algo como \`!add bola de fogo 3d6\` ou \`!add dano 2d6 + 1d8\`.`);
+  }
+
   const result = setPreset(message.author.id, name, notation);
   if (!result.ok) {
     return message.reply('Não consegui salvar esse dado.');
